@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>THE_VAULT | VIEW_THREAD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap');
+        
+        body { background: #000; color: #d1d5db; font-family: 'JetBrains Mono', monospace; }
+        
+        /* Layout Structure */
+        .post-container { display: flex; min-height: 100vh; border-left: 1px solid #111; border-right: 1px solid #111; }
+        .user-sidebar { width: 220px; background: #080808; border-right: 1px solid #111; flex-shrink: 0; }
+        .content-main { flex: 1; background: #030303; }
+        
+        /* ADMINISTRATOR STYLING */
+        .text-admin-red { color: #ff0000; text-shadow: 0 0 10px rgba(255, 0, 0, 0.6); font-weight: 900; }
+        .badge-admin-pink { background: #ff69b4; color: #000; box-shadow: 0 0 15px #ff69b4; font-weight: 800; }
+        
+        /* RANK BADGES */
+        .rank-badge { font-size: 9px; padding: 2px 8px; text-transform: uppercase; letter-spacing: 1px; border-radius: 2px; }
+        .badge-stars { background: #ffd700; color: #000; }
+        .badge-leader { background: #ff0000; color: #fff; }
+        .badge-god { background: #0000ff; color: #fff; }
+        .badge-member { background: #222; color: #888; }
+
+        .stars-gold { color: #ffd700; text-shadow: 0 0 8px rgba(255, 215, 0, 0.5); }
+        .data-vault { background: #000; border: 1px solid #1a1a1a; position: relative; }
+        .data-vault::before { content: "SECRET_DUMP"; position: absolute; top: -8px; left: 10px; background: #000; padding: 0 5px; font-size: 8px; color: #444; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <nav class="p-4 border-b border-zinc-900 bg-black flex justify-between items-center sticky top-0 z-50">
+        <h2 class="text-xs font-black italic text-zinc-500 tracking-widest uppercase">ZaneLab_Vault_System</h2>
+        <a href="forum.html" class="text-[10px] text-zinc-600 hover:text-white underline uppercase tracking-tighter">← Back to Forum</a>
+    </nav>
+
+    <div class="max-w-7xl mx-auto w-full flex-1 flex shadow-2xl">
+        <div class="post-container w-full">
+            
+            <aside class="user-sidebar p-8 flex flex-col items-center">
+                <div id="authorAvatar" class="w-24 h-24 bg-zinc-950 border border-zinc-900 flex items-center justify-center text-4xl font-black text-white mb-5">
+                    ?
+                </div>
+                
+                <h3 id="authorName" class="text-sm font-bold mb-2">@Loading...</h3>
+                
+                <div class="text-center mb-3">
+                    <span id="authorRank" class="rank-badge">RANK</span>
+                </div>
+
+                <div id="starContainer" class="flex flex-wrap justify-center gap-0.5 text-[10px] stars-gold mb-8">
+                    </div>
+
+                <div class="w-full border-t border-zinc-900 pt-6 space-y-3 text-[9px] uppercase font-bold text-zinc-600">
+                    <div class="flex justify-between"><span>Status:</span> <span class="text-green-600 animate-pulse">Online</span></div>
+                    <div class="flex justify-between"><span>Post_Count:</span> <span id="postCount" class="text-white">0</span></div>
+                    <div class="flex justify-between"><span>Reputation:</span> <span class="text-blue-600">+1.2k</span></div>
+                </div>
+            </aside>
+
+            <main class="content-main p-10">
+                <header class="border-b border-zinc-900 pb-8 mb-10">
+                    <p class="text-[9px] text-zinc-700 uppercase mb-3 font-bold" id="postDate">Decrypted: --/--/----</p>
+                    <h1 id="postTitle" class="text-4xl font-black italic text-white tracking-tighter">DECRYPTING_PACKET...</h1>
+                </header>
+
+                <article class="space-y-10">
+                    <div id="postDesc" class="text-xs leading-relaxed text-zinc-500 italic">
+                        Data ini telah divalidasi oleh Sentinel Bot. Segala bentuk penyalahgunaan di luar lab adalah tanggung jawab user.
+                    </div>
+
+                    <div class="data-vault p-8 rounded-sm">
+                        <pre id="postContent" class="text-[12px] text-blue-500 font-mono overflow-x-auto whitespace-pre-wrap">Waiting for server response...</pre>
+                    </div>
+
+                    <div class="pt-10 flex gap-4">
+                        <button onclick="window.print()" class="border border-zinc-800 px-8 py-3 text-[10px] font-black uppercase hover:bg-white hover:text-black transition">Print_Log</button>
+                        <button class="bg-red-950/20 border border-red-900 text-red-600 px-8 py-3 text-[10px] font-black uppercase hover:bg-red-600 hover:text-white transition">Download_Dump</button>
+                    </div>
+                </article>
+            </main>
+
+        </div>
+    </div>
+
+    <script type="module">
+        import { db } from "./auth-system.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const params = new URLSearchParams(window.location.search);
+        const postId = params.get('id');
+
+        async function initThread() {
+            if (!postId) { window.location.href = "forum.html"; return; }
+
+            try {
+                const snap = await getDoc(doc(db, "forum_posts", postId));
+                if (!snap.exists()) { alert("Data Expired."); window.location.href = "forum.html"; return; }
+
+                const data = snap.data();
+                
+                // --- UPDATE KONTEN DATA ---
+                document.getElementById('postTitle').innerText = "[LEAK] " + data.title;
+                document.getElementById('postContent').innerText = data.content;
+                document.getElementById('postDate').innerText = "Decrypted: " + new Date(data.timestamp?.toDate()).toLocaleString();
+
+                // --- UPDATE SIDEBAR (LOGIC ADMIN & RANK) ---
+                const nameEl = document.getElementById('authorName');
+                const rankEl = document.getElementById('authorRank');
+                
+                nameEl.innerText = "@" + data.author;
+                rankEl.innerText = data.authorRank;
+                document.getElementById('authorAvatar').innerText = data.author.charAt(0).toUpperCase();
+
+                // Logic Warna Admin (Merah & Pink)
+                if (data.authorRank === "ADMINISTRATOR" || data.authorRank === "ADMIN") {
+                    nameEl.classList.add('text-admin-red');
+                    rankEl.classList.add('badge-admin-pink');
+                } else {
+                    nameEl.classList.add('text-white');
+                    // Warna Rank Lainnya
+                    if (data.authorRank === "STARS") rankEl.classList.add('badge-stars');
+                    else if (data.authorRank === "LEADER DARK") rankEl.classList.add('badge-leader');
+                    else if (data.authorRank === "GOD") rankEl.classList.add('badge-god');
+                    else rankEl.classList.add('badge-member');
+                }
+
+                // Render Bintang Sesuai Kasta
+                const starBox = document.getElementById('starContainer');
+                starBox.innerHTML = "";
+                for(let i=0; i < (data.authorStars || 0); i++) {
+                    starBox.innerHTML += "★";
+                }
+
+            } catch (e) {
+                console.error(e);
+                document.getElementById('postTitle').innerText = "ERROR_LOAD_FAILED";
+            }
+        }
+
+        initThread();
+    </script>
+</body>
+</html>

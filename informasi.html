@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>INTELLIGENCE FEED | ZANELAB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#050505] text-[#d1d5db] font-mono p-10">
+    <div class="max-w-4xl mx-auto">
+        <header class="flex justify-between items-center mb-10 border-b border-white/10 pb-4">
+            <h1 class="text-2xl font-black italic">CYBER_<span class="text-blue-500">INTELLIGENCE</span></h1>
+            <a href="index.html" class="text-[10px] text-gray-500 hover:text-white uppercase">← Back</a>
+        </header>
+
+        <div class="space-y-6">
+            <div class="p-6 bg-zinc-900/30 border border-white/5 rounded-sm">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-[9px] bg-blue-600/20 text-blue-400 px-2 py-0.5 font-bold uppercase">Web_Security</span>
+                    <span class="text-[9px] text-gray-600 italic">Feb 24, 2026</span>
+                </div>
+                <h2 class="text-lg font-bold text-white hover:text-blue-400 cursor-pointer">Panduan Dasar Bypass WAF untuk Pentesting</h2>
+                <p class="text-xs text-gray-500 mt-2 leading-relaxed">Informasi mengenai teknik enkripsi payload untuk melewati deteksi Web Application Firewall standar.</p>
+                <div class="mt-4 flex gap-4 text-[9px] text-gray-600 font-bold uppercase">
+                    <span>Author: @Zane_Dev</span>
+                    <span>Views: 1.2k</span>
+                </div>
+            </div>
+            </div>
+    </div>
+<script type="module">
+    import { BACKEND_URL } from "./auth-system.js";
+
+    async function loadIntelligenceFeed() {
+        const feedContainer = document.querySelector('.space-y-6');
+        
+        try {
+            // Mengambil data dari endpoint informasi di Railway
+            const res = await fetch(`${BACKEND_URL}/informasi/all`); 
+            const newsData = await res.json();
+
+            // Clear placeholder jika ada data
+            if(newsData.length > 0) feedContainer.innerHTML = "";
+
+            newsData.forEach(news => {
+                feedContainer.innerHTML += `
+                    <div class="p-6 bg-zinc-900/30 border border-white/5 rounded-sm hover:border-blue-500/30 transition-all">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-[9px] bg-blue-600/20 text-blue-400 px-2 py-0.5 font-bold uppercase">${news.category || 'INTEL'}</span>
+                            <span class="text-[9px] text-gray-600 italic">${new Date(news.created_at).toLocaleDateString()}</span>
+                        </div>
+                        <h2 class="text-lg font-bold text-white hover:text-blue-400 cursor-pointer">${news.title}</h2>
+                        <p class="text-xs text-gray-500 mt-2 leading-relaxed">${news.news_content}</p>
+                        <div class="mt-4 flex gap-4 text-[9px] text-gray-600 font-bold uppercase">
+                            <span>Author: ${news.author || '@Zane_Dev'}</span>
+                            <span>ID: #${news.id.toString().slice(0,5)}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        } catch (e) {
+            console.error("Intelligence Feed Offline:", e);
+        }
+    }
+
+    // Jalankan saat halaman dimuat
+    document.addEventListener('DOMContentLoaded', loadIntelligenceFeed);
+</script>
+</body>
+</html>

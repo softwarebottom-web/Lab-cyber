@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>BLUE_DEF | ZANELAB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>body { background: #000; color: #00ffff; font-family: 'JetBrains Mono', monospace; }</style>
+</head>
+<body class="p-6">
+    <h1 class="text-xl font-black border-b border-cyan-600 pb-2 mb-10">BLUE_TEAM <span class="text-white font-normal underline text-xs">MONITORING_INTEL</span></h1>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+        <div class="bg-zinc-900/50 border border-cyan-900 p-6 rounded-xl">
+            <h3 class="text-xs font-bold text-white mb-4 italic uppercase">Sabotage_Attempts (Logs)</h3>
+            <div id="sabotage-list" class="space-y-4">
+                <div class="p-3 bg-black border-l-2 border-red-600 text-[10px]">
+                    <p class="font-bold text-red-500">IP: 114.xxx.xx.xx (Memberontak)</p>
+                    <p>Loc: Jakarta, ID (Lat: -6.2, Lon: 106.8)</p>
+                    <p class="text-gray-500 italic">Attempt: Unauthorized Admin Access</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, db } from "./auth-system.js";
+        import { getDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        auth.onAuthStateChanged(async (user) => {
+            const snap = await getDoc(doc(db, "users", user.uid));
+            const role = snap.data().role;
+            if (role !== "BLUE" && role !== "ADMIN") {
+                window.location.href = "honeypot.html";
+            }
+        });
+    </script>
+</body>
+</html>

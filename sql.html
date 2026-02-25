@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>SQL & RECON | ZANELAB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-white h-screen flex flex-col font-mono">
+    <div class="p-6 border-b border-white/5 flex justify-between bg-zinc-950">
+        <h2 class="text-blue-500 font-black">RECON_ENGINE_v3</h2>
+        <a href="lab.html" class="text-xs text-gray-500 hover:text-white underline">← BACK_TO_HUB</a>
+    </div>
+
+    <div class="flex-1 flex overflow-hidden">
+        <div class="w-80 p-6 border-r border-white/5 space-y-6">
+            <div>
+                <label class="text-[10px] text-gray-500 block mb-1 uppercase font-bold">Target Input</label>
+                <input type="text" id="target" placeholder="http://target.com" class="w-full bg-black border border-white/10 p-3 text-xs outline-none focus:border-red-600">
+            </div>
+            <div>
+                <label class="text-[10px] text-gray-500 block mb-1 uppercase font-bold">Module</label>
+                <select id="tool" class="w-full bg-black border border-white/10 p-3 text-xs outline-none">
+                    <option value="nmap">Nmap Scan</option>
+                    <option value="sqlmap">SQLMap Inject</option>
+                    <option value="whois">Whois Lookup</option>
+                </select>
+            </div>
+            <button onclick="execute()" class="w-full bg-blue-700 py-4 font-black text-xs hover:bg-red-700 transition-all italic">EXECUTE_SCAN</button>
+        </div>
+
+        <div class="flex-1 bg-zinc-950 p-6 overflow-y-auto">
+            <div id="terminal" class="text-[10px] text-blue-400 space-y-1">
+                <p>[*] Waiting for user input...</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { BACKEND_URL } from "./auth-system.js";
+        window.execute = async () => {
+            const term = document.getElementById('terminal');
+            const target = document.getElementById('target').value;
+            const tool = document.getElementById('tool').value;
+
+            if(!target) return alert("Target URL/IP required!");
+            term.innerHTML += `<p class="text-yellow-500 mt-2">[!] Running ${tool} on ${target}...</p>`;
+
+            try {
+                const res = await fetch(`${BACKEND_URL}/run`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ target: target, tool: tool })
+                });
+                const data = await res.json();
+                term.innerHTML += `<pre class="text-green-500 mt-1">${data.output}</pre>`;
+            } catch (err) {
+                term.innerHTML += `<p class="text-red-500">[ERROR] Failed to reach Railway Engine.</p>`;
+            }
+        };
+    </script>
+</body>
+</html>

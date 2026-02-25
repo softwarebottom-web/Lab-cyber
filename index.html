@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZANELAB | HOME</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; }
+        .nav-link { color: #666; transition: 0.3s; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        .nav-link:hover { color: #fff; }
+        .hero-text { font-size: clamp(3rem, 10vw, 8rem); line-height: 0.9; letter-spacing: -0.05em; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <nav class="p-8 flex justify-between items-center fixed top-0 w-full z-50 bg-black/50 backdrop-blur-md">
+        <h1 class="text-xl font-black italic tracking-tighter">ZANE<span class="text-red-600">LAB</span></h1>
+        <ul class="hidden md:flex gap-8 items-center">
+            <li><a href="lab.html" class="nav-link">Laboratory</a></li>
+            <li><a href="informasi.html" class="nav-link">Intelligence</a></li>
+            <li><a href="forum.html" class="nav-link">Dark_Forum</a></li>
+            <li><a href="profile.html" class="nav-link">Account</a></li>
+            <li><button onclick="logoutZane()" class="nav-link text-red-900 hover:text-red-500">Logout</button></li>
+        </ul>
+    </nav>
+
+    <main class="flex-1 flex flex-col justify-center px-8 md:px-20 mt-20">
+        <div class="max-w-5xl">
+            <h2 class="hero-text font-black italic text-zinc-800 mb-8">ABOUT_ <br><span class="text-white">ZANE_SERVICE.</span></h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 text-zinc-400 leading-relaxed text-sm">
+                <p>
+                    ZaneLab adalah infrastruktur siber privat yang dirancang untuk pengujian penetrasi, riset kerentanan, dan pertukaran informasi intelijen tingkat tinggi. Kami menyediakan lingkungan "Zero Trust" bagi para praktisi keamanan untuk bereksperimen dengan tools offensive dan defensive secara aman dan terisolasi.
+                </p>
+                <p>
+                    Setiap aktivitas di dalam lab ini diawasi oleh <span class="text-white font-bold">Police Bot v3.0</span>. Kami mengintegrasikan tracking IP dan Geolocation untuk memastikan integritas komunitas tetap terjaga dari upaya sabotase atau "skidding" yang tidak bertanggung jawab.
+                </p>
+            </div>
+
+            <div class="mt-12 flex gap-4">
+                <a href="lab.html" class="bg-white text-black px-10 py-4 font-black text-xs uppercase hover:bg-red-600 hover:text-white transition">Get Started</a>
+                <a href="register.html" class="border border-zinc-800 px-10 py-4 font-black text-xs uppercase hover:bg-zinc-800 transition">Join Crew</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="p-8 border-t border-zinc-900 flex justify-between items-center text-[10px] text-zinc-600 uppercase font-bold tracking-widest">
+        <div>System_Status: <span class="text-green-500">Active</span></div>
+        <div>&copy; 2026 Zane Developer</div>
+    </footer>
+
+    <script type="module">
+        import { auth } from "./auth-system.js";
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // Cek Status Login
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                // Belum Login? Lempar ke Register
+                window.location.href = "register.html";
+            }
+        });
+
+        // Logout Function
+        window.logoutZane = () => {
+            signOut(auth).then(() => {
+                window.location.href = "register.html";
+            });
+        };
+    </script>
+</body>
+</html>

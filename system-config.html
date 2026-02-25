@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>SYSTEM_CONFIG | ZANELAB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #000; color: #333; font-family: 'Courier New', monospace; }
+        .term-input { background: #050505; border: 1px solid #111; color: #444; }
+        .term-input:focus { border-color: #222; color: #666; outline: none; }
+    </style>
+</head>
+<body class="h-screen flex items-center justify-center">
+    <div class="w-full max-w-sm p-10 border border-zinc-900 bg-zinc-950/20">
+        <div class="mb-8">
+            <h1 class="text-[10px] font-bold uppercase tracking-[0.5em] text-zinc-700">System_Configuration_v3</h1>
+            <p class="text-[8px] text-zinc-800 mt-1 uppercase italic">Terminal access restricted to authorized engineers only.</p>
+        </div>
+
+        <div class="space-y-5">
+            <div>
+                <label class="text-[9px] uppercase font-bold text-zinc-600">Access_Token</label>
+                <input type="password" id="mKey" class="term-input w-full p-3 mt-1 text-xs transition-all" placeholder="UUID-XXXX-XXXX">
+            </div>
+            <button onclick="verifyAccess()" class="w-full border border-zinc-800 text-zinc-700 py-3 text-[9px] font-black uppercase hover:bg-white hover:text-black transition-all">Verify_Identity</button>
+        </div>
+        
+        <div class="mt-8 flex justify-between items-center opacity-20">
+            <span class="text-[7px]">SECURE_SOCKET_ENCRYPTED</span>
+            <span class="text-[7px]">BY ZANELAB_CORE</span>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, BACKEND_URL } from "./auth-system.js";
+
+        // ANTI-INSPECT TRAP
+        setInterval(() => {
+            const start = performance.now();
+            debugger; 
+            if (performance.now() - start > 50) {
+                reportViolation("DEVTOOLS_EXPLOIT_ATTEMPT");
+            }
+        }, 500);
+
+        window.verifyAccess = async () => {
+            const key = document.getElementById('mKey').value;
+            const user = auth.currentUser;
+
+            // Kita kirim ke backend Railway untuk verifikasi (Stealth)
+            // Password 'XSTAR' di-encode biar gak keliatan di Network Tab
+            const payload = btoa(key + ":" + (user ? user.uid : "ANON"));
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/gate-keeper`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ secure_payload: payload })
+                });
+
+                const res = await response.json();
+
+                if (res.status === "AUTHORIZED") {
+                    window.location.href = res.path;
+                } else {
+                    // Jika salah/role bukan admin, IP langsung dikirim ke blacklist
+                    window.location.href = "honeypot.html";
+                }
+            } catch (e) {
+                window.location.href = "honeypot.html";
+            }
+        };
+
+        async function reportViolation(reason) {
+            await fetch(`${BACKEND_URL}/report-sabotage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reason: reason })
+            });
+            window.location.href = "honeypot.html";
+        }
+    </script>
+</body>
+</html>

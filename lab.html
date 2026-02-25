@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>HUB | ZANELAB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #000; color: #fff; font-family: monospace; }
+        .card-tool { background: #0a0a0a; border: 1px solid #1e3a8a; transition: 0.3s; }
+        .card-tool:hover { border-color: #ef4444; transform: translateY(-5px); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <nav class="p-6 border-b border-white/10 flex justify-between items-center bg-black">
+        <h1 class="text-xl font-black italic">ZANE<span class="text-blue-500 underline">LAB</span>_V3</h1>
+        <div class="flex items-center gap-6">
+            <span id="rank-display" class="text-[10px] px-3 py-1 bg-blue-900/30 text-blue-400 rounded-full italic font-bold">LOADING...</span>
+            <button onclick="logoutZane()" class="text-[10px] text-red-500 hover:underline">LOGOUT</button>
+        </div>
+    </nav>
+
+    <main class="flex-1 p-10 grid grid-cols-1 md:grid-cols-3 gap-8">
+        <a href="network.html" class="card-tool p-8 rounded-2xl flex flex-col items-center text-center">
+            <span class="text-4xl mb-4">📶</span>
+            <h3 class="font-bold text-blue-500 underline">NETWORK_DIAG</h3>
+            <p class="text-[10px] text-gray-500 mt-2">Scan DHCP, WiFi Config, and IP Interface.</p>
+        </a>
+
+        <a href="sql.html" class="card-tool p-8 rounded-2xl flex flex-col items-center text-center">
+            <span class="text-4xl mb-4">💉</span>
+            <h3 class="font-bold text-red-600 underline">RECON_ENGINE</h3>
+            <p class="text-[10px] text-gray-500 mt-2">SQLMap, Nmap, and WHOIS Integration.</p>
+        </a>
+
+        <a href="showcase.html" class="card-tool p-8 rounded-2xl flex flex-col items-center text-center">
+            <span class="text-4xl mb-4">📦</span>
+            <h3 class="font-bold text-yellow-500 underline">MEMBER_TOOLS</h3>
+            <p class="text-[10px] text-gray-500 mt-2">Upload scripts with AI Malware detection.</p>
+        </a>
+    </main>
+
+    <script type="module">
+        import { auth, db } from "./auth-system.js";
+        import { getDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                const snap = await getDoc(doc(db, "users", user.uid));
+                document.getElementById('rank-display').innerText = snap.data().rank.toUpperCase();
+            }
+        });
+
+        window.logoutZane = () => signOut(auth).then(() => window.location.href = "login.html");
+    </script>
+</body>
+</html>

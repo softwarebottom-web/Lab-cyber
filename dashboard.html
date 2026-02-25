@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>DASHBOARD | ZANELAB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; }
+        .nav-card { background: #050505; border: 1px solid #111; transition: 0.3s; position: relative; overflow: hidden; }
+        .nav-card:hover { border-color: #333; transform: translateY(-3px); }
+        .role-badge { font-size: 8px; font-weight: 900; padding: 2px 8px; border-radius: 2px; text-transform: uppercase; position: absolute; top: 10px; right: 10px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <nav class="p-6 border-b border-zinc-900 flex justify-between items-center bg-black/50 backdrop-blur-xl sticky top-0 z-50">
+        <h1 class="font-black italic text-xl">ZANE<span class="text-red-600">LAB</span></h1>
+        <div class="flex gap-6 items-center text-[10px] font-bold uppercase tracking-widest">
+            <span id="display-rank" class="text-zinc-500">Syncing...</span>
+            <button onclick="logout()" class="text-red-900 hover:text-red-500 transition">Logout</button>
+        </div>
+    </nav>
+
+    <main class="flex-1 p-10 max-w-6xl mx-auto w-full">
+        <header class="mb-12">
+            <h2 class="text-4xl font-black italic uppercase tracking-tighter">Command_Center</h2>
+            <p id="welcome-msg" class="text-zinc-500 text-xs mt-2 italic">Identify verified. Welcome back.</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <a href="lab.html" class="nav-card p-8">
+                <h3 class="font-black text-sm uppercase mb-2">Offensive Lab</h3>
+                <p class="text-[10px] text-zinc-600">Akses SQLMap, Network, & Showcase.</p>
+            </a>
+
+            <a href="informasi.html" class="nav-card p-8">
+                <h3 class="font-black text-sm uppercase mb-2 text-blue-500">Intelligence</h3>
+                <p class="text-[10px] text-zinc-600">News feed & Vulnerability reports.</p>
+            </a>
+
+            <a href="forum.html" class="nav-card p-8">
+                <h3 class="font-black text-sm uppercase mb-2 text-zinc-400">Dark Vault</h3>
+                <p class="text-[10px] text-zinc-600">Data leaks & underground exchange.</p>
+            </a>
+
+            <a href="seminar.html" class="nav-card p-8 border-l-4 border-yellow-600">
+                <h3 class="font-black text-sm uppercase mb-2 text-yellow-500">Live Seminar</h3>
+                <p class="text-[10px] text-zinc-600">Voice & Education session.</p>
+            </a>
+
+            <div id="role-sector"></div>
+
+            <a href="system-config.html" class="nav-card p-8 border-dashed border-red-900/50 group">
+                <h3 class="font-black text-sm uppercase mb-2 text-red-700 group-hover:text-red-500">System Config</h3>
+                <p class="text-[10px] text-zinc-800">Root authorization only.</p>
+            </a>
+        </div>
+    </main>
+
+    <script type="module">
+        import { auth, db } from "./auth-system.js";
+        import { getDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) window.location.href = "register.html";
+            const snap = await getDoc(doc(db, "users", user.uid));
+            const data = snap.data();
+
+            document.getElementById('display-rank').innerText = data.rank;
+            document.getElementById('welcome-msg').innerText = `Identify verified: @${data.username}. Welcome back.`;
+
+            // Tampilkan Panel khusus berdasarkan Role
+            const sector = document.getElementById('role-sector');
+            if (data.role === "RED" || data.role === "ADMIN") {
+                sector.innerHTML = `
+                    <a href="red.html" class="nav-card p-8 border-l-4 border-red-600">
+                        <span class="role-badge bg-red-600 text-black">RED_UNIT</span>
+                        <h3 class="font-black text-sm uppercase mb-2">Red Operations</h3>
+                        <p class="text-[10px] text-zinc-600">Targeting, Tracing & Explicit Strike.</p>
+                    </a>`;
+            } else if (data.role === "BLUE") {
+                sector.innerHTML = `
+                    <a href="blue.html" class="nav-card p-8 border-l-4 border-cyan-500">
+                        <span class="role-badge bg-cyan-500 text-black">BLUE_UNIT</span>
+                        <h3 class="font-black text-sm uppercase mb-2 text-cyan-500">Blue Defense</h3>
+                        <p class="text-[10px] text-zinc-600">Traffic Monitoring & Auto-Ban Logs.</p>
+                    </a>`;
+            }
+        });
+
+        window.logout = () => auth.signOut().then(() => window.location.href = "index.html");
+    </script>
+</body>
+</html>

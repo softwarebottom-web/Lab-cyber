@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>LIVE SEMINAR | ZANELAB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src='https://8x8.vc/vpaas-magic-cookie-3b82f6/external_api.js'></script>
+    <style>
+        body { background: #000; color: #fff; font-family: 'JetBrains Mono', monospace; }
+        #meet { background: #0a0a0a; border: 1px solid #1e3a8a; }
+        .chat-area { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+    <header class="p-4 border-b border-white/10 flex justify-between items-center bg-black">
+        <div class="flex items-center gap-4">
+            <h1 class="text-xl font-black italic text-red-600 animate-pulse">LIVE_<span class="text-white">SEMINAR</span></h1>
+            <span class="text-[10px] bg-blue-600/20 text-blue-400 px-2 py-1 border border-blue-500/30 font-bold uppercase">Topic: Web Exploitation v3</span>
+        </div>
+        <div class="flex gap-4">
+            <button onclick="startVoice()" class="text-[10px] bg-green-600 px-4 py-2 font-bold hover:bg-green-500 transition">ACTIVATE_VOICE</button>
+            <a href="lab.html" class="text-[10px] border border-white/20 px-4 py-2 hover:bg-white/10 transition">EXIT_ROOM</a>
+        </div>
+    </header>
+
+    <div class="flex-1 flex overflow-hidden">
+        <div class="flex-1 p-4">
+            <div id="meet" class="w-full h-full rounded-2xl overflow-hidden relative">
+                <div id="placeholder" class="absolute inset-0 flex items-center justify-center text-gray-700 italic text-sm">
+                    [ CLICK "ACTIVATE_VOICE" TO JOIN THE SESSION ]
+                </div>
+            </div>
+        </div>
+
+        <aside class="w-80 p-4 border-l border-white/10 flex flex-col gap-4">
+            <div class="chat-area flex-1 rounded-2xl p-4 flex flex-col">
+                <h3 class="text-xs font-bold mb-4 border-b border-white/10 pb-2 italic uppercase">Room_Chat</h3>
+                <div id="messages" class="flex-1 overflow-y-auto space-y-3 text-[10px]">
+                    <p><b class="text-blue-500 italic">Bot:</b> Welcome to the session, @Zane_User.</p>
+                </div>
+                <input type="text" id="msgInput" placeholder="Type a message..." class="mt-4 bg-black border border-white/10 p-3 text-xs outline-none focus:border-blue-500 rounded-lg">
+            </div>
+            
+            <div class="h-32 chat-area rounded-2xl p-4 border-l-4 border-yellow-500">
+                <h3 class="text-[9px] font-bold text-yellow-500 mb-2 uppercase tracking-widest">Live_Transcript</h3>
+                <p id="transcript" class="text-[10px] text-gray-500 italic">"Waiting for speaker voice..."</p>
+            </div>
+        </aside>
+    </div>
+
+    <script type="module">
+        import { auth, db } from "./auth-system.js";
+        import { getDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Proteksi Akses
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) window.location.href = "login.html";
+            else {
+                const snap = await getDoc(doc(db, "users", user.uid));
+                const data = snap.data();
+                // Logic: Minimal Rank Member untuk masuk
+                if (!data) window.location.href = "login.html";
+            }
+        });
+
+        // Jitsi Integration
+        window.startVoice = () => {
+            document.getElementById('placeholder').style.display = 'none';
+            const domain = "meet.jit.si";
+            const options = {
+                roomName: "ZaneLab_Seminar_Room_2026",
+                width: "100%",
+                height: "100%",
+                parentNode: document.querySelector('#meet'),
+                lang: 'id',
+                interfaceConfigOverwrite: {
+                    SHOW_JITSI_WATERMARK: false,
+                    TOOLBAR_BUTTONS: ['microphone', 'camera', 'desktop', 'chat', 'raisehand']
+                }
+            };
+            const api = new JitsiMeetExternalAPI(domain, options);
+        };
+    </script>
+</body>
+</html>

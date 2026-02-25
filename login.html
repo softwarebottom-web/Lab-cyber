@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>LOGIN | ZANELAB ACCESS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #050505; color: #d1d5db; font-family: 'Courier New', monospace; }
+        .input-dark { background: #0a0a0a; border: 1px solid #333; transition: 0.3s; }
+        .input-dark:focus { border-color: #7c3aed; box-shadow: 0 0 10px #7c3aed44; outline: none; }
+        .btn-rank { background: linear-gradient(90deg, #1e1e1e, #2e2e2e); border: 1px solid #444; }
+    </style>
+</head>
+<body class="flex items-center justify-center h-screen">
+    <div class="w-full max-w-md p-8 bg-zinc-900/30 border border-white/5 rounded-sm shadow-2xl">
+        <div class="text-center mb-10">
+            <h1 class="text-3xl font-black italic tracking-tighter text-white">ZANE<span class="text-purple-600">LAB</span></h1>
+            <p class="text-[10px] text-gray-500 mt-2 uppercase tracking-[0.4em]">Secure Authentication Gateway</p>
+        </div>
+
+        <form id="loginForm" class="space-y-6">
+            <div>
+                <label class="text-[10px] uppercase font-bold text-gray-400">Identity (Email)</label>
+                <input type="email" id="email" required class="w-full p-3 mt-1 input-dark text-sm rounded-sm">
+            </div>
+            <div>
+                <label class="text-[10px] uppercase font-bold text-gray-400">Passcode</label>
+                <input type="password" id="password" required class="w-full p-3 mt-1 input-dark text-sm rounded-sm">
+            </div>
+            <button type="submit" class="w-full py-4 btn-rank text-xs font-black uppercase tracking-widest hover:border-purple-500 transition-all">
+                Access System
+            </button>
+        </form>
+        
+        <p class="mt-8 text-center text-[10px] text-gray-600">
+            Unauthorized access will be logged and <span class="text-red-600 underline">BANNED</span>.
+        </p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.x/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.x/firebase-auth.js";
+        
+        // KONFIGURASI FIREBASE LU
+        const firebaseConfig = { /* Paste config lu di sini */ };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        document.getElementById('loginForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+                window.location.href = "profile.html";
+            } catch (err) {
+                // TENDANG KE HONEYPOT JIKA GAGAL
+                window.location.href = "honeypot.html";
+                fetch('https://lab-beckend-production.up.railway.app/trigger-honeypot', {method: 'POST'});
+            }
+        };
+    </script>
+</body>
+</html>

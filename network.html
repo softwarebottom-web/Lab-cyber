@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>NETWORK_DIAG | ZANELAB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-white p-10 font-mono">
+    <h1 class="text-2xl font-black italic text-blue-500 mb-10 border-b border-white/10 pb-4">NET_INTERFACE_SCANNER</h1>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+        <div class="p-8 bg-zinc-900 border border-blue-900/20 rounded-3xl">
+            <h3 class="text-xs font-bold mb-6 italic underline">DHCP_PROTOCOL_LOG</h3>
+            <div id="log" class="text-xs space-y-2 text-gray-400">
+                <p>> Capturing local interface...</p>
+                <p>> Detecting IPv4: <span id="ip" class="text-green-500">Processing...</span></p>
+                <p>> Gateway Found: 192.168.1.1</p>
+                <p>> DNS: 8.8.8.8 (Google)</p>
+            </div>
+        </div>
+        <div class="flex items-center justify-center p-8 bg-zinc-950 rounded-3xl border border-dashed border-white/10">
+            <p class="text-[10px] text-gray-700 animate-pulse">[ CAPTURING_TRAFFIC_PACKETS... ]</p>
+        </div>
+    </div>
+    <script>
+        fetch('https://api.ipify.org?format=json')
+            .then(res => res.json())
+            .then(data => document.getElementById('ip').innerText = data.ip);
+    </script>
+</body>
+</html>

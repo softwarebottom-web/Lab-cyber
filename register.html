@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JOIN THE CREW | ZANELAB REGISTER</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #050505; color: #d1d5db; font-family: 'Courier New', monospace; }
+        .input-dark { background: #0a0a0a; border: 1px solid #333; transition: 0.3s; }
+        .input-dark:focus { border-color: #7c3aed; box-shadow: 0 0 10px #7c3aed44; outline: none; }
+        .btn-register { background: linear-gradient(90deg, #1e1e1e, #2e2e2e); border: 1px solid #444; cursor: pointer; }
+        .btn-register:hover { border-color: #7c3aed; color: #7c3aed; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="w-full max-w-lg p-8 bg-zinc-900/30 border border-white/5 rounded-sm shadow-2xl">
+        <div class="text-center mb-10">
+            <h1 class="text-3xl font-black italic tracking-tighter text-white uppercase">Create <span class="text-purple-600">Identity</span></h1>
+            <p class="text-[10px] text-gray-500 mt-2 uppercase tracking-[0.3em]">Become a part of ZaneLab Community</p>
+        </div>
+
+        <form id="registerForm" class="space-y-5">
+            <div>
+                <label class="text-[10px] uppercase font-bold text-gray-400 italic">Codename (Username)</label>
+                <input type="text" id="username" required placeholder="Ex: Ghost_User" class="w-full p-3 mt-1 input-dark text-sm rounded-sm">
+            </div>
+
+            <div>
+                <label class="text-[10px] uppercase font-bold text-gray-400 italic">Email Address</label>
+                <input type="email" id="email" required placeholder="user@provider.com" class="w-full p-3 mt-1 input-dark text-sm rounded-sm">
+            </div>
+
+            <div>
+                <label class="text-[10px] uppercase font-bold text-gray-400 italic">Secret Passcode</label>
+                <input type="password" id="password" required placeholder="********" class="w-full p-3 mt-1 input-dark text-sm rounded-sm">
+            </div>
+
+            <div>
+                <label class="text-[10px] uppercase font-bold text-red-500 italic">Urgent Contact (Telegram/Discord)</label>
+                <input type="text" id="urgent" required placeholder="@yourname" class="w-full p-3 mt-1 input-dark text-sm rounded-sm">
+            </div>
+
+            <button type="submit" class="w-full py-4 btn-register text-xs font-black uppercase tracking-widest transition-all mt-4">
+                Initialize Account
+            </button>
+        </form>
+        
+        <p class="mt-6 text-center text-[11px]">
+            Already have an identity? <a href="login.html" class="text-purple-500 hover:underline">Login here</a>
+        </p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Konfigurasi Firebase Lu (Ambil dari Project Settings di Firebase Console)
+        const firebaseConfig = {
+            apiKey: "AIzaSy...",
+            authDomain: "project-lu.firebaseapp.com",
+            projectId: "project-lu",
+            storageBucket: "project-lu.appspot.com",
+            messagingSenderId: "...",
+            appId: "..."
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        document.getElementById('registerForm').onsubmit = async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const urgent = document.getElementById('urgent').value;
+
+            try {
+                // 1. Buat User di Firebase Auth
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // 2. Simpan Data Tambahan ke Firestore
+                await setDoc(doc(db, "users", user.uid), {
+                    username: username,
+                    email: email,
+                    role: "user",        // Role default
+                    rank: "Member",      // Rank awal (seperti request lu)
+                    postCount: 0,
+                    about: "I am a new shadow in ZaneLab.",
+                    urgent: urgent,
+                    createdAt: new Date().toISOString()
+                });
+
+                alert("Account Initialized! Redirecting to Profile...");
+                window.location.href = "profile.html";
+
+            } catch (error) {
+                console.error(error);
+                alert("Error: " + error.message);
+            }
+        };
+    </script>
+</body>
+</html>

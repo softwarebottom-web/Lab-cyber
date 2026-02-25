@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>SHOWCASE | ZANELAB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#050505] text-white p-10 font-mono">
+    <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-end mb-10">
+            <h1 class="text-4xl font-black italic">MEMBER_<span class="text-yellow-500 underline">PROJECTS</span></h1>
+            <a href="lab.html" class="text-xs text-gray-500 italic underline">EXIT_SHOWCASE</a>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <div class="bg-zinc-900/50 p-6 rounded-3xl border border-white/5 h-fit">
+                <h3 class="text-xs font-bold text-gray-400 mb-4 italic">UPLOAD_TOOL (.ZIP)</h3>
+                <input type="file" id="zipFile" class="w-full text-[10px] mb-4 file:bg-yellow-600 file:border-none file:px-3 file:py-1 file:text-white file:font-bold">
+                <button onclick="upload()" class="w-full bg-white text-black py-3 font-black text-xs tracking-widest hover:bg-yellow-500 transition">PUSH_SERVER</button>
+            </div>
+
+            <div class="lg:col-span-3 space-y-4">
+                <div class="text-[10px] text-gray-600 italic mb-2">// RECENT_UPLOADS</div>
+                <div class="p-4 bg-zinc-900 border border-white/5 rounded-xl flex justify-between items-center">
+                    <div>
+                        <p class="font-bold text-sm">Exploit_Pack_v1.zip</p>
+                        <p class="text-[9px] text-gray-500 italic">Owner: @Zane_Admin | Status: <span class="text-green-500">VERIFIED</span></p>
+                    </div>
+                    <button class="bg-blue-600 px-4 py-2 text-[10px] font-bold">DL</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { BACKEND_URL } from "./auth-system.js";
+        window.upload = async () => {
+            const fileInput = document.getElementById('zipFile');
+            if(!fileInput.files[0]) return alert("Pilih file zip!");
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const res = await fetch(`${BACKEND_URL}/scan-zip`, { method: 'POST', body: formData });
+                const data = await res.json();
+                if(data.status === "MALWARE_DETECTED") {
+                    alert("⚠️ BOT ALERT: " + data.report);
+                    location.reload();
+                } else {
+                    alert("✅ Success: " + data.message);
+                }
+            } catch (err) { alert("Backend Offline!"); }
+        };
+    </script>
+</body>
+</html>

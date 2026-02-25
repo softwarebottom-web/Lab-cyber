@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PUBLISH_DATA | ZANELAB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+        body { background: #000; color: #fff; font-family: 'JetBrains Mono', monospace; }
+        input, select, textarea { 
+            background: #050505 !important; 
+            border: 1px solid #111 !important; 
+            color: #ccc !important; 
+            font-size: 12px !important;
+        }
+        input:focus, textarea:focus { border-color: #ef4444 !important; outline: none; }
+        .btn-publish { background: #ff0000; color: #000; font-weight: 900; transition: 0.3s; }
+        .btn-publish:hover { background: #fff; box-shadow: 0 0 20px #ff0000; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6">
+
+    <div class="w-full max-w-2xl border border-zinc-900 bg-zinc-950/50 p-10">
+        <header class="mb-10 border-b border-red-900 pb-6">
+            <h1 class="text-2xl font-black italic tracking-tighter">PUBLISH_<span class="text-red-600">LEAK</span></h1>
+            <p class="text-[9px] text-zinc-600 uppercase tracking-[0.3em] mt-1">Upload intelligence to the dark vault</p>
+        </header>
+
+        <div class="space-y-6">
+            <div>
+                <label class="text-[10px] font-bold text-zinc-500 uppercase italic">Intel_Subject</label>
+                <input type="text" id="title" class="w-full p-4 mt-2" placeholder="e.g. 200GB Govt Database Leak">
+            </div>
+
+            <div>
+                <label class="text-[10px] font-bold text-zinc-500 uppercase italic">Classification</label>
+                <select id="category" class="w-full p-4 mt-2 cursor-pointer">
+                    <option value="DATABASE">DATABASE_LEAK</option>
+                    <option value="EXPLOIT">EXPLOIT_POC</option>
+                    <option value="CONFIG">CONFIG_CREDENTIALS</option>
+                    <option value="GOV_DATA">GOVERNMENT_SENSITIVE</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="text-[10px] font-bold text-zinc-500 uppercase italic">Data_Payload (JSON/Links/Logs)</label>
+                <textarea id="content" class="w-full p-4 mt-2 h-48" placeholder="Paste your findings here..."></textarea>
+            </div>
+
+            <div class="pt-4 flex flex-col gap-4">
+                <button onclick="executePublish()" class="btn-publish w-full py-4 text-xs uppercase tracking-widest">Execute_Upload</button>
+                <a href="forum.html" class="text-center text-[10px] text-zinc-700 hover:text-white transition uppercase">← Cancel_Operation</a>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, db } from "./auth-system.js";
+        import { addDoc, collection, serverTimestamp, doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        window.executePublish = async () => {
+            const user = auth.currentUser;
+            if (!user) { alert("UNAUTHORIZED: Login required."); return; }
+
+            const title = document.getElementById('title').value;
+            const content = document.getElementById('content').value;
+            const category = document.getElementById('category').value;
+
+            if (!title || !content) { alert("DATA_INCOMPLETE"); return; }
+
+            try {
+                // 1. Ambil Data Profile User Saat Ini
+                const userRef = doc(db, "users", user.uid);
+                const userSnap = await getDoc(userRef);
+                const userData = userSnap.data();
+
+                // 2. Logic Kalkulasi Kasta & Bintang (Zane Scale)
+                let currentCount = (userData.post_count || 0) + 1;
+                let newRank = userData.rank || "MEMBER";
+                let newStars = 0;
+
+                // --- ZANELAB RANKING SYSTEM ---
+                if (currentCount >= 2000000) {
+                    newRank = "STARS"; // Kasta Tertinggi
+                    newStars = 100; // Simbolis
+                } else if (currentCount >= 5000) {
+                    newRank = "LEADER DARK";
+                    newStars = Math.min(30, 5 + Math.floor((currentCount - 5000) / 1500)); // Bintang 5-30
+                } else if (currentCount >= 500) {
+                    newRank = "GOD";
+                    newStars = Math.min(70, 1 + Math.floor((currentCount - 500) / 65)); // Bintang 1-70
+                } else if (currentCount >= 50) {
+                    newRank = "CRIME";
+                    newStars = Math.min(5, 1 + Math.floor((currentCount - 50) / 90)); // Bintang 1-5
+                }
+
+                // Khusus ADMIN tidak boleh keganti rank-nya
+                if (userData.role === "ADMIN") {
+                    newRank = "ADMINISTRATOR";
+                    newStars = 99; // Admin dapet bintang full
+                }
+
+                // 3. Simpan Post ke Forum
+                await addDoc(collection(db, "forum_posts"), {
+                    title: title,
+                    content: content,
+                    category: category,
+                    author: userData.username,
+                    authorRank: newRank,
+                    authorStars: newStars,
+                    uid: user.uid,
+                    timestamp: serverTimestamp()
+                });
+
+                // 4. Update Profile User
+                await updateDoc(userRef, {
+                    post_count: increment(1),
+                    rank: newRank,
+                    stars_count: newStars
+                });
+
+                alert(`SUCCESS: Data published. Current Post: ${currentCount} | Rank: ${newRank}`);
+                window.location.href = "forum.html";
+
+            } catch (err) {
+                console.error(err);
+                alert("STRIKE_FAILED: Check console.");
+            }
+        };
+    </script>
+</body>
+</html>
