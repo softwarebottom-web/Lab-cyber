@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDENTITY_VAULT | ZANELAB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #050505; color: #d1d5db; font-family: 'Courier New', monospace; }
+        .border-glow { border: 1px solid #333; transition: 0.3s; }
+        .border-glow:hover { border-color: #7c3aed; box-shadow: 0 0 15px #7c3aed22; }
+        .stats-box { background: rgba(10, 10, 10, 0.8); border: 1px solid #1a1a1a; }
+    </style>
+</head>
+<body class="min-h-screen p-6">
+    <div class="max-w-3xl mx-auto">
+        
+        <header class="flex justify-between items-center mb-10 border-b border-white/5 pb-4">
+            <div>
+                <h1 class="text-xl font-black italic tracking-tighter text-white">USER_<span class="text-purple-600">PROFILE</span></h1>
+                <p class="text-[9px] text-gray-600 uppercase">Accessing encrypted identity data...</p>
+            </div>
+            <a href="dashboard.html" class="text-[10px] border border-zinc-800 px-4 py-2 hover:bg-white hover:text-black transition-all uppercase font-bold tracking-widest">
+                [ Return_to_Dashboard ]
+            </a>
+        </header>
+
+        <div class="border-glow p-8 bg-zinc-900/20 rounded-sm mb-6">
+            <div class="flex items-center gap-6 mb-8">
+                <div class="w-20 h-20 bg-purple-900/20 border border-purple-500/50 flex items-center justify-center">
+                    <span id="initials" class="text-2xl font-black text-purple-500">?</span>
+                </div>
+                <div>
+                    <h2 id="display-username" class="text-2xl font-black text-white italic">Loading...</h2>
+                    <p id="display-email" class="text-xs text-gray-500"></p>
+                    <span id="display-rank" class="inline-block mt-2 text-[10px] bg-white/5 border border-white/10 px-2 py-0.5 text-gray-400 font-bold uppercase">Rank: Fetching...</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div class="stats-box p-4 text-center">
+                    <p class="text-[9px] text-gray-600 uppercase font-bold mb-1">Data_Leaks</p>
+                    <h3 id="stat-posts" class="text-xl font-black text-white">0</h3>
+                </div>
+                <div class="stats-box p-4 text-center">
+                    <p class="text-[9px] text-gray-600 uppercase font-bold mb-1">Stars_Earned</p>
+                    <h3 id="stat-stars" class="text-xl font-black text-yellow-500">0</h3>
+                </div>
+                <div class="stats-box p-4 text-center col-span-2 md:col-span-1">
+                    <p class="text-[9px] text-gray-600 uppercase font-bold mb-1">Status</p>
+                    <h3 class="text-sm font-black text-green-500 uppercase">Verified</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-end gap-4">
+            <button onclick="handleLogout()" class="text-[10px] text-red-500 hover:text-red-400 font-bold uppercase underline">Terminate_Session</button>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { auth, db, logoutUser } from "./auth-system.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // Cek Status Login
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // Ambil Data dari Firestore
+                const docRef = doc(db, "users", user.uid);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    
+                    // Update UI
+                    document.getElementById('display-username').innerText = data.username || "Unknown";
+                    document.getElementById('display-email').innerText = data.email;
+                    document.getElementById('display-rank').innerText = "Rank: " + (data.rank || "Member");
+                    document.getElementById('stat-posts').innerText = data.post_count || 0;
+                    document.getElementById('stat-stars').innerText = data.stars_count || 0;
+                    document.getElementById('initials').innerText = (data.username || "U").charAt(0).toUpperCase();
+                }
+            } else {
+                // Jika tidak login, tendang balik ke login.html
+                window.location.href = "login.html";
+            }
+        });
+
+        // Fungsi Logout
+        window.handleLogout = async () => {
+            if(confirm("Are you sure you want to terminate session?")) {
+                await logoutUser();
+                window.location.href = "login.html";
+            }
+        };
+    </script>
+</body>
+</html>
