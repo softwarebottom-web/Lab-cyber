@@ -50,59 +50,31 @@
             Already have an identity? <a href="login.html" class="text-purple-500 hover:underline">Login here</a>
         </p>
     </div>
+<script type="module">
+    // Import fungsi dari file sistem lu yang udah bener kuncinya
+    import { registerUser } from "./auth-system.js";
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    document.getElementById('registerForm').onsubmit = async (e) => {
+        e.preventDefault();
+        
+        // Ambil data dari input
+        const username = document.getElementById('username').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const urgent = document.getElementById('urgent').value;
 
-        // Konfigurasi Firebase Lu (Ambil dari Project Settings di Firebase Console)
-        const firebaseConfig = {
-            apiKey: "AIzaSy...",
-            authDomain: "project-lu.firebaseapp.com",
-            projectId: "project-lu",
-            storageBucket: "project-lu.appspot.com",
-            messagingSenderId: "...",
-            appId: "..."
-        };
+        // Panggil fungsi register dari auth-system.js
+        const result = await registerUser(email, password, username);
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        document.getElementById('registerForm').onsubmit = async (e) => {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const urgent = document.getElementById('urgent').value;
-
-            try {
-                // 1. Buat User di Firebase Auth
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-
-                // 2. Simpan Data Tambahan ke Firestore
-                await setDoc(doc(db, "users", user.uid), {
-                    username: username,
-                    email: email,
-                    role: "user",        // Role default
-                    rank: "Member",      // Rank awal (seperti request lu)
-                    postCount: 0,
-                    about: "I am a new shadow in ZaneLab.",
-                    urgent: urgent,
-                    createdAt: new Date().toISOString()
-                });
-
-                alert("Account Initialized! Redirecting to Profile...");
-                window.location.href = "profile.html";
-
-            } catch (error) {
-                console.error(error);
-                alert("Error: " + error.message);
-            }
-        };
-    </script>
+        if (result.success) {
+            alert("Account Initialized! Welcome to ZaneLab.");
+            window.location.href = "profile.html";
+        } else {
+            // Ini bakal nampilin error asli dari Firebase (misal: password kurang panjang)
+            console.error(result.error);
+            alert("Security Protocol Failed: " + result.error);
+        }
+    };
+</script>
 </body>
 </html>
